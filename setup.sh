@@ -166,7 +166,7 @@ The Deployment Service Principal $SP_NAME_DEPLOY will now be assigned the follow
 $(for role in "${SP_DEPLOY_ROLES_LIST[@]}"; do echo "  * $role"; done)
 EOT
 fi
-az account show
+
 cat <<EOT
 
 Please choose one or many subscriptions you want to assign rights on in the following list.
@@ -204,7 +204,7 @@ do
       for try in {1..10}
       do
         # We need to loop due to Azure AD propagation latency
-        az role assignment create --assignee "${SP_HASH[$SP_NAME"_APP_ID"]}" --role "$role" --subscription "$SUBSCRIPTION_ID" && SUCCESS="Yes" && break
+        az role assignment create --assignee "${SP_HASH[$SP_NAME"_APP_ID"]}" --role "$role" --scope "/subscriptions/$SUBSCRIPTION_ID" > /dev/null 2>&1 && SUCCESS="Yes" && break
         echo -n "."
         sleep 3
       done
@@ -227,7 +227,7 @@ do
         for try in {1..30}
         do
           # We need to loop due to Azure AD propagation latency
-          az role assignment create --assignee "${SP_HASH[$SP_NAME_DEPLOY"_APP_ID"]}" --role "$role" --subscription "$SUBSCRIPTION_ID" && break
+          az role assignment create --assignee "${SP_HASH[$SP_NAME_DEPLOY"_APP_ID"]}" --role "$role" --scope "/subscriptions/$SUBSCRIPTION_ID" > /dev/null 2>&1 && break
           echo -n "."
           sleep 3
         done
@@ -299,7 +299,7 @@ then
       for try in {1..30}
       do
         # We need to loop due to Azure AD propagation latency
-        az role assignment create --assignee "$GROUP_OBJECT_ID" --role "$GROUP_ROLE" --subscription "$SUB" > /dev/null 2>&1 && break
+        az role assignment create --assignee "$GROUP_OBJECT_ID" --role "$GROUP_ROLE" --scope "/subscriptions/$SUB" > /dev/null 2>&1 && break
         sleep 3
       done
       echo "Done assigning role"
